@@ -22,12 +22,39 @@ typedef struct{
     int numOfLoans;
 } Book;
 
+struct _nu{
+    User *info;
+    struct _nu *left;
+    struct _nu *right;
+};
+typedef struct _nu NodeUser;
+
 struct _nd{
     Book *info;
     struct _nd *left;
     struct _nd *right;
 };
 typedef struct _nd NodeBook;
+
+NodeUser *createNodeUser(){
+    NodeUser *new = malloc(sizeof(NodeUser));
+    
+    User *user = malloc(sizeof(User));
+
+    printf("Nome de usuário: ");
+    fgets(user->name, MAX_NAME, stdin);
+    user->name[strcspn(user->name, "\n")] = '\0';
+
+    printf("Email: ");
+    fgets(user->email, MAX_EMAIL, stdin);
+    user->email[strcspn(user->email, "\n")] = '\0';
+
+    user->numOfBooks = 0;
+    
+    new->info = user;
+    
+    return new;
+}
 
 NodeBook *createNodeBook(){
     NodeBook *new = malloc(sizeof(NodeBook));
@@ -36,11 +63,11 @@ NodeBook *createNodeBook(){
 
     printf("Título: ");
     fgets(book->title, MAX_TITLE, stdin);
-    book->title[strcspn(new->info->title, "\n")] = '\0';
+    book->title[strcspn(book->title, "\n")] = '\0';
 
     printf("Autor: ");
     fgets(book->writer, MAX_NAME, stdin);
-    book->writer[strcspn(new->info->writer, "\n")] = '\0';
+    book->writer[strcspn(book->writer, "\n")] = '\0';
 
     printf("Ano de publicação: ");
     scanf("%d", &book->year);
@@ -59,8 +86,9 @@ NodeBook *createNodeBook(){
     return new;
 }
 
+
+
 int main(){
 
     return 0;
 }
-//Teste commit Jose
