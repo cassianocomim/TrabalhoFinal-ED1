@@ -77,9 +77,11 @@ NodeBook *createNodeBook(){
     printf("ID: ");
     scanf("%d", &book->id);
 
-    strcpy("Disponível", book->status);
+    while (getchar() != '\n'); //Ajuda de LLM para limpar o buffer do \n após o scanf e não prejudiar o fgets.
 
-    strcpy("Ninguém", book->whoBorrowed);
+    strcpy(book->status, "Disponível");
+
+    strcpy(book->whoBorrowed, "Ninguém");
 
     book->numOfLoans = 0;
 
@@ -118,7 +120,62 @@ NodeUser *insertUser(NodeUser *rootUser, NodeUser *newUser){
     return rootUser;
 }
 
+
+
 int main(){
+    int option= -1;
+    NodeBook *rootBook = NULL;
+    NodeUser *rootUser = NULL;
+
+    while (option != 0){
+        printf("\n----------Biblioteca----------\n");
+        printf("1. Cadastro\n");
+        printf("2. Consulta\n");
+        printf("3. Atualização\n");
+        printf("4. Exclusão\n");
+        printf("5. Empréstimo\n");
+        printf("6. Devolução\n");
+        printf("7. Estatísticas\n");
+        printf("0. Sair\n");
+        printf("------------------------------\n");
+        printf("Escolha uma opção: ");
+        scanf("%d", &option);
+        while (getchar() != '\n');
+
+        if (option < 0 || option > 7){
+            printf("Opção inválida!\n");
+        }
+
+        if (option == 0){
+            break;
+        }
+
+        if (option == 1){
+            int optcad = -1;
+
+            printf("\n1. Livros\n");
+            printf("2. Usuários\n");
+            printf("0. Voltar\n");
+            printf("Escolha uma opção: ");
+            scanf("%d", &optcad);
+            while (getchar() != '\n');
+
+            if (optcad < 0 || optcad > 2){
+                printf("Opção inválida!\n");
+            }
+
+            if (optcad == 1){
+                rootBook = insertBook(rootBook, createNodeBook());
+                printf("\nLivro cadastrado.\n");
+            }
+
+            if (optcad == 2){
+                rootUser = insertUser(rootUser, createNodeUser());
+                printf("\nUsuário cadastrado.\n");
+            }
+        }
+    }
+
 
     return 0;
 }
