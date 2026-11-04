@@ -90,7 +90,33 @@ NodeBook *createNodeBook(){
     return new;
 }
 
+NodeBook *insertBook(NodeBook *rootBook, NodeBook *newBook){
+    if (rootBook == NULL){
+        return newBook;
+    }
 
+    if (rootBook->info->id >= newBook->info->id){
+        rootBook->left = insertBook(rootBook->left, newBook);
+    } else{
+        rootBook->right = insertBook(rootBook->right, newBook);
+    }
+    
+    return rootBook;
+}
+
+NodeUser *insertUser(NodeUser *rootUser, NodeUser *newUser){
+    if (rootUser == NULL){
+        return newUser;
+    }
+
+    if (strcmp(rootUser->info->name, newUser->info->name) >= 0){
+        rootUser->left = insertUser(rootUser->left, newUser);
+    } else{
+        rootUser->right = insertUser(rootUser->right, newUser);
+    }
+    
+    return rootUser;
+}
 
 int main(){
 
