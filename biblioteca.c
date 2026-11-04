@@ -29,12 +29,12 @@ struct _nu{
 };
 typedef struct _nu NodeUser;
 
-struct _nd{
+struct _nb{
     Book *info;
-    struct _nd *left;
-    struct _nd *right;
+    struct _nb *left;
+    struct _nb *right;
 };
-typedef struct _nd NodeBook;
+typedef struct _nb NodeBook;
 
 NodeUser *createNodeUser(){
     NodeUser *new = malloc(sizeof(NodeUser));
@@ -52,6 +52,8 @@ NodeUser *createNodeUser(){
     user->numOfBooks = 0;
     
     new->info = user;
+    new->left = NULL;
+    new->right = NULL;
     
     return new;
 }
@@ -82,6 +84,8 @@ NodeBook *createNodeBook(){
     book->numOfLoans = 0;
 
     new->info = book;
+    new->left = NULL;
+    new->right = NULL;
 
     return new;
 }
