@@ -17,7 +17,7 @@ typedef struct{
     char writer[MAX_NAME];
     int year;
     int id;
-    char status[10];
+    char status[12];
     char whoBorrowed[MAX_EMAIL];
     int numOfLoans;
 } Book;
@@ -111,7 +111,7 @@ NodeUser *insertUser(NodeUser *rootUser, NodeUser *newUser){
         return newUser;
     }
 
-    if (strcmp(rootUser->info->name, newUser->info->name) >= 0){
+    if (strcmp(rootUser->info->email, newUser->info->email) >= 0){
         rootUser->left = insertUser(rootUser->left, newUser);
     } else{
         rootUser->right = insertUser(rootUser->right, newUser);
@@ -120,7 +120,86 @@ NodeUser *insertUser(NodeUser *rootUser, NodeUser *newUser){
     return rootUser;
 }
 
+NodeBook *deleteBook(NodeBook *rootBook, int id){
+    if (rootBook == NULL){
+        printf("Livro não encontrado.\n");
+        return rootBook;
+    }
+    
+    if (rootBook->info->id > id){
+        rootBook->left = deleteBook(rootBook->left, id);
+    } else if (rootBook->info->id < id){
+        rootBook->right = deleteBook(rootBook->right, id);
+    } else {
+        //Caso com 0 ou 1 filho
+        if (rootBook->left == NULL){
+            NodeBook *aux = rootBook->right;
+            free(rootBook);
+            return aux;
+        } else if (rootBook->right == NULL){
+            NodeBook *aux = rootBook->left;
+            free(rootBook);
+            return aux;
+        }
 
+        //Caso com 2 filhos
+        NodeBook *aux = rootBook->right;
+        while (aux->left != NULL){
+            aux = aux->left;
+        }
+        rootBook->info->id = aux->info->id;
+
+        rootBook->right = deleteBook(rootBook->right, aux->info->id);
+    }
+    return rootBook;
+}
+
+NodeUser *deleteUser(NodeUser *rootUser, char email[]){
+    if (rootUser == NULL){
+        printf("Usuário não encontrado.\n");
+        return rootUser;
+    }
+    
+    
+    if (strcmp(rootUser->info->email, email) > 0){
+        rootUser->left = deleteUser(rootUser->left, email);
+    } else if (strcmp(rootUser->info->email, email) < 0){
+        rootUser->right = deleteUser(rootUser->right, email);
+    } else {
+        //Caso com 0 ou 1 filho
+        if (rootUser->left == NULL){
+            NodeUser *aux = rootUser->right;
+            free(rootUser);
+            return aux;
+        } else if (rootUser->right == NULL){
+            NodeUser *aux = rootUser->left;
+            free(rootUser);
+            return aux;
+        }
+
+        //Caso com 2 filhos
+        NodeUser *aux = rootUser->right;
+        while (aux->left != NULL){
+            aux = aux->left;
+        }
+        strcpy(rootUser->info->email, aux->info->email);
+
+        rootUser->right = deleteUser(rootUser->right, aux->info->email);
+    }
+    return rootUser;
+}
+
+NodeBook *showBooksInOrder(NodeBook *rootBook){
+    if (rootBook == NULL){
+        return rootBook;
+    }
+
+    rootBook->left = showBooksInOrder(rootBook->left);
+    printf("\t %s | %s | %d | ID: %d \n\t%s | Emprestado para: %s\n", rootBook->info->title, rootBook->info->writer, rootBook->info->year, rootBook->info->id, rootBook->info->status, rootBook->info->whoBorrowed);
+    rootBook->right = showBooksInOrder(rootBook->right);
+
+    return rootBook;
+}
 
 int main(){
     int option= -1;
@@ -175,7 +254,17 @@ int main(){
             }
         }
     }
-
+    showBooksInOrder(rootBook);
+    //necessário para delete
+    // char email[MAX_EMAIL];
+    // printf("Email: ");
+    // scanf("%s", email);
+    // while (getchar() != '\n');
+    // int id;
+    // printf("ID: ");
+    // scanf("%d", &id);
+    // while (getchar() != '\n');
+    
 
     return 0;
 }
