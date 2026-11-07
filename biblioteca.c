@@ -114,13 +114,16 @@ NodeBook *insertBook(NodeBook *rootBook, NodeBook *newBook){
 
 NodeUser *insertUser(NodeUser *rootUser, NodeUser *newUser){
     if (rootUser == NULL){
+        printf("\nUsuário cadastrado.\n");
         return newUser;
     }
 
-    if (strcmp(rootUser->info->email, newUser->info->email) >= 0){
+    if (strcmp(rootUser->info->email, newUser->info->email) > 0){
         rootUser->left = insertUser(rootUser->left, newUser);
-    } else{
+    } else if (strcmp(rootUser->info->email, newUser->info->email) < 0){
         rootUser->right = insertUser(rootUser->right, newUser);
+    } else{
+        printf("Email já cadastrado!\n");
     }
     
     return rootUser;
@@ -140,11 +143,15 @@ NodeBook *deleteBook(NodeBook *rootBook, int id){
         //Caso com 0 ou 1 filho
         if (rootBook->left == NULL){
             NodeBook *aux = rootBook->right;
+            free(rootBook->info);
             free(rootBook);
+            printf("\nLivro deletado!");
             return aux;
         } else if (rootBook->right == NULL){
             NodeBook *aux = rootBook->left;
+            free(rootBook->info);
             free(rootBook);
+            printf("\nLivro deletado!");
             return aux;
         }
 
@@ -175,11 +182,15 @@ NodeUser *deleteUser(NodeUser *rootUser, char email[]){
         //Caso com 0 ou 1 filho
         if (rootUser->left == NULL){
             NodeUser *aux = rootUser->right;
+            free(rootUser->info);
             free(rootUser);
+            printf("\nUsuário deletado.");
             return aux;
         } else if (rootUser->right == NULL){
             NodeUser *aux = rootUser->left;
+            free(rootUser->info);
             free(rootUser);
+            printf("\nUsuário deletado.");
             return aux;
         }
 
@@ -213,7 +224,7 @@ NodeUser *showUserInOrder(NodeUser *rootUser){
     }
 
     rootUser->left = showUserInOrder(rootUser->left);
-    printf("\n\tUsuário: %s\n\tEmail: %s\n", rootUser->info->name, rootUser->info->email);
+    printf("\n\tUsuário: %s\n\tEmail: %s\n\tNúmero de livros em posse: %d\n", rootUser->info->name, rootUser->info->email, rootUser->info->numOfBooks);
     rootUser->right = showUserInOrder(rootUser->right);
 
     return rootUser;
@@ -253,57 +264,85 @@ NodeBook *findBookByWriter(NodeBook *rootBook, char writer[], int *verify){
     return rootBook;
 }
 
-NodeUser *findUserByName(NodeUser *rootUser, char name[]){
+NodeUser *findUserByEmail(NodeUser *rootUser, char email[]){
     if (rootUser == NULL){
         printf("\nUsuário não encontrado\n");
         return NULL;
     }
 
-    if (strcmp(rootUser->info->name, name) > 0){
-        rootUser->left = findUserByName(rootUser->left, name);
-    } else if (strcmp(rootUser->info->name, name) < 0){
-        rootUser->right = findUserByName(rootUser->right, name);
+    if (strcmp(rootUser->info->email, email) > 0){
+        rootUser->left = findUserByEmail(rootUser->left, email);
+    } else if (strcmp(rootUser->info->email, email) < 0){
+        rootUser->right = findUserByEmail(rootUser->right, email);
     } else{
-        printf("\n\tUsuário: %s\n\tEmail: %s\n", rootUser->info->name, rootUser->info->email);
+        printf("\n\tUsuário: %s\n\tEmail: %s\n\tNúmero de livros em posse: %d\n", rootUser->info->name, rootUser->info->email, rootUser->info->numOfBooks);
         return rootUser;
     }
     
     return rootUser;
 }
 
-NodeUser *findUserByEmail(NodeUser *rootUser, char email[], int *verify){
+NodeUser *findUserByName(NodeUser *rootUser, char name[], int *verify){
     if (rootUser == NULL){
         return NULL;
     }
 
-    if (strcmp(rootUser->info->email, email) == 0){
-        printf("\n\tUsuário: %s\n\tEmail: %s\n", rootUser->info->name, rootUser->info->email);
+    if (strcmp(rootUser->info->name, name) == 0){
+        printf("\n\tUsuário: %s\n\tEmail: %s\n\tNúmero de livros em posse: %d\n", rootUser->info->name, rootUser->info->email, rootUser->info->numOfBooks);
         *verify = 1;
     }
 
-    findUserByEmail(rootUser->left, email, verify);
-    findUserByEmail(rootUser->right, email, verify);
+    findUserByName(rootUser->left, name, verify);
+    findUserByName(rootUser->right, name, verify);
     
     return rootUser;
 }
 
-// NodeBook *bookLoan(NodeBook *rootBook, NodeUser *rootUser){
-//     if (rootBook == NULL){
-//         printf("Nenhum livro cadastrado.\n");
-//         return NULL;
-//     }
-//     if (rootUser == NULL){
-//         printf("Nenhum usuário cadastrado.\n");
-//         return NULL;
-//     }
+NodeBook *findLoansByEmail(NodeBook *rootBook, char email[], int *verify){
+    if (rootBook == NULL){
+        return NULL;
+    }
 
-//     int id;
-//     printf("ID: ");
-//     scanf("%d", &id);
-//     while (getchar() != '\n');
+    if (strcmp(rootBook->info->whoBorrowed, email) == 0){
+       printf("\n\t%s (%d) | ID: %d\n\tAutor: %s | Status: %s | Emprestado para: %s\n", rootBook->info->title, rootBook->info->year, rootBook->info->id, rootBook->info->writer, rootBook->info->status, rootBook->info->whoBorrowed);
+        *verify = 1;
+    }
 
+    findLoansByEmail(rootBook->left, email, verify);
+    findLoansByEmail(rootBook->right, email, verify);
+    
+    return rootBook;
+}
 
-// }
+NodeBook *bookLoan(NodeBook *rootBook, NodeUser *rootUser, int id, char email[]){
+    if (rootBook == NULL){
+        printf("\nLivro não encontrado.\n");
+        return NULL;
+    }
+    if (rootUser == NULL){
+        printf("\nUsuário não encontrado.\n");
+        return NULL;
+    }
+
+    if (rootBook->info->id > id){
+        rootBook->left = bookLoan(rootBook->left, rootUser, id, email);
+    } else if (rootBook->info->id < id){
+        rootBook->right = bookLoan(rootBook->right, rootUser, id, email);
+    } else{
+        if (strcmp(rootUser->info->email, email) > 0){
+            rootBook = bookLoan(rootBook, rootUser->left, id, email);
+        } else if (strcmp(rootUser->info->email, email) < 0){
+            rootBook->right = bookLoan(rootBook, rootUser->right, id, email);
+        } else{
+            strcpy(rootBook->info->whoBorrowed, email);
+            strcpy(rootBook->info->status, "Emprestado");
+            rootBook->info->numOfLoans++;
+            rootUser->info->numOfBooks++;
+            printf("Empréstimo realizado.\n");
+        }
+    }
+    return rootBook;
+}
 
 
 int main(){
@@ -355,7 +394,6 @@ int main(){
 
             if (optcad == 2){
                 rootUser = insertUser(rootUser, createNodeUser());
-                printf("\nUsuário cadastrado.\n");
             }
         }
 
@@ -422,36 +460,85 @@ int main(){
                 }
                 if (optfnduser == 1){
                     char name[MAX_NAME];
+                    int verify = 0;
                     printf("Nome: ");
                     fgets(name, MAX_NAME, stdin);
                     name[strcspn(name, "\n")] = '\0';
-                    findUserByName(rootUser, name);
-                }
-                if (optfnduser == 2){
-                    char email[MAX_EMAIL];
-                    int verify = 0;
-                    printf("Email: ");
-                    fgets(email, MAX_NAME, stdin);
-                    email[strcspn(email, "\n")] = '\0';
-                    findUserByEmail(rootUser, email, &verify);
+                    findUserByName(rootUser, name, &verify);
                     if (verify == 0){
                         printf("\nUsuário não encontrado.\n");
                     }
                 }
+                if (optfnduser == 2){
+                    char email[MAX_EMAIL];
+                    printf("Email: ");
+                    fgets(email, MAX_NAME, stdin);
+                    email[strcspn(email, "\n")] = '\0';
+                    findUserByEmail(rootUser, email);
+                }
             }
+            
+            if (optfnd == 3){
+                char email[MAX_EMAIL];
+                    int verify = 0;
+                    printf("Email: ");
+                    fgets(email, MAX_NAME, stdin);
+                    email[strcspn(email, "\n")] = '\0';
+                    findLoansByEmail(rootBook, email, &verify);
+                    if (verify == 0){
+                        printf("\nNenhum empréstimo.\n");
+                    }
+            }
+        }
+
+        //FALTA OPTION 3 ATUALIZAÇÃO!!!
+
+        if (option == 4){
+            int optdel;
+            printf("\n1. Livro\n");
+            printf("2. Usuário\n");
+            printf("0. Voltar\n");
+            printf("Escolha uma opção: ");
+            scanf("%d", &optdel);               
+            while (getchar() != '\n');
+
+            if (optdel < 0 || optdel > 2){
+                    printf("\nOpção inválida!\n");
+            }
+
+            if (optdel == 1){
+                int id;
+                printf("ID: ");
+                scanf("%d", &id);
+                while (getchar() != '\n');
+                rootBook = deleteBook(rootBook, id);
+            }
+
+            if (optdel == 2){
+                char email[MAX_EMAIL];
+                printf("Email: ");
+                fgets(email, MAX_NAME, stdin);
+                email[strcspn(email, "\n")] = '\0';
+                rootUser = deleteUser(rootUser, email);
+            }
+
+        }
+
+        if (option == 5){
+            printf("\n5. Empréstimo\n");
+            char email[MAX_EMAIL];
+            int id;
+            printf("\nID do livro: ");
+            scanf("%d", &id);
+            while (getchar() != '\n');
+            printf("Email do usuário: ");
+            scanf("%s", email);
+            while (getchar() != '\n');
+            bookLoan(rootBook, rootUser, id, email);
         }
     }
     showBooksInOrder(rootBook);
     showUserInOrder(rootUser);
-    //necessário para delete
-    // char email[MAX_EMAIL];
-    // printf("Email: ");
-    // scanf("%s", email);
-    // while (getchar() != '\n');
-    // int id;
-    // printf("ID: ");
-    // scanf("%d", &id);
-    // while (getchar() != '\n');
     
 
     return 0;
