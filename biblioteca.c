@@ -97,10 +97,15 @@ NodeBook *insertBook(NodeBook *rootBook, NodeBook *newBook){
         return newBook;
     }
 
-    if (rootBook->info->id >= newBook->info->id){
+    if (rootBook->info->id > newBook->info->id){
         rootBook->left = insertBook(rootBook->left, newBook);
-    } else{
+    } else if (rootBook->info->id < newBook->info->id){
         rootBook->right = insertBook(rootBook->right, newBook);
+    } else{
+        printf("ID já existente, escolha outro id.\n");
+        printf("ID: ");
+        scanf("%d", &newBook->info->id);
+        insertBook(rootBook, newBook);
     }
     
     return rootBook;
