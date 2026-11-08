@@ -314,6 +314,79 @@ NodeBook *findLoansByEmail(NodeBook *rootBook, char email[], int *verify){
     return rootBook;
 }
 
+NodeBook *updateBook(NodeBook *rootBook, int id){
+    if (rootBook == NULL){
+        printf("\nLivro não encontrado\n");
+        return NULL;
+    }
+
+    if (rootBook->info->id > id){
+        rootBook->left = findBookById(rootBook->left, id);
+    } else if (rootBook->info->id < id){
+        rootBook->right = findBookById(rootBook->right, id);
+    } else {
+        printf("\n\t%s (%d) | ID: %d\n\tAutor: %s | Status: %s | Emprestado para: %s\n", rootBook->info->title, rootBook->info->year, rootBook->info->id, rootBook->info->writer, rootBook->info->status, rootBook->info->whoBorrowed);
+        char newTitle[MAX_TITLE], newWriter[MAX_NAME];
+        int newYear;
+        printf("\nAltere as informações:\n");
+        printf("Caso não queira alterar Título e Autor digite NÃO, e para o ano digite 0\n");
+        printf("Título: ");
+        fgets(newTitle, MAX_TITLE, stdin);
+        newTitle[strcspn(newTitle, "\n")] = '\0';
+        if (strcmp(newTitle, "NÃO") != 0){
+            strcpy(rootBook->info->title, newTitle);
+        }
+        printf("Autor: ");
+        fgets(newWriter, MAX_NAME, stdin);
+        newWriter[strcspn(newWriter, "\n")] = '\0';
+        if (strcmp(newWriter, "NÃO") != 0){
+            strcpy(rootBook->info->writer, newWriter);
+        }
+        printf("Ano de publicação: ");
+        scanf("%d", &newYear);
+        while (getchar() != '\n');
+        if (newYear != 0){
+            rootBook->info->year = newYear;
+        }
+        printf("\n\t%s (%d) | ID: %d\n\tAutor: %s | Status: %s | Emprestado para: %s\n", rootBook->info->title, rootBook->info->year, rootBook->info->id, rootBook->info->writer, rootBook->info->status, rootBook->info->whoBorrowed);
+        printf("\nInformações alteradas.\n");
+
+        return rootBook;
+    }
+    return rootBook;
+}
+
+NodeUser *updateUser(NodeUser *rootUser, char email[]){
+    if (rootUser == NULL){
+        printf("\nUsuário não encontrado\n");
+        return NULL;
+    }
+
+    if (strcmp(rootUser->info->email, email) > 0){
+        rootUser->left = findUserByEmail(rootUser->left, email);
+    } else if (strcmp(rootUser->info->email, email) < 0){
+        rootUser->right = findUserByEmail(rootUser->right, email);
+    } else{
+        printf("\n\tUsuário: %s\n\tEmail: %s\n\tNúmero de livros em posse: %d\n", rootUser->info->name, rootUser->info->email, rootUser->info->numOfBooks);
+        char newName[MAX_NAME];
+        printf("\nAltere o nome:\n");
+        printf("Caso queira manter digite NÃO\n");
+        printf("Nome: ");
+        fgets(newName, MAX_NAME, stdin);
+        newName[strcspn(newName, "\n")] = '\0';
+        if (strcmp(newName, "NÃO") != 0){
+            strcpy(rootUser->info->name, newName);
+            printf("\nInformações alteradas.\n");
+        }
+        printf("\n\tUsuário: %s\n\tEmail: %s\n\tNúmero de livros em posse: %d\n", rootUser->info->name, rootUser->info->email, rootUser->info->numOfBooks);
+        
+
+        return rootUser;
+    }
+    
+    return rootUser;
+}
+
 NodeBook *bookLoan(NodeBook *rootBook, NodeUser *rootUser, int id, char email[]){
     if (rootBook == NULL){
         printf("\nLivro não encontrado.\n");
@@ -334,11 +407,15 @@ NodeBook *bookLoan(NodeBook *rootBook, NodeUser *rootUser, int id, char email[])
         } else if (strcmp(rootUser->info->email, email) < 0){
             rootBook->right = bookLoan(rootBook, rootUser->right, id, email);
         } else{
-            strcpy(rootBook->info->whoBorrowed, email);
-            strcpy(rootBook->info->status, "Emprestado");
-            rootBook->info->numOfLoans++;
-            rootUser->info->numOfBooks++;
-            printf("Empréstimo realizado.\n");
+            if (strcmp(rootBook->info->status, "Disponível") == 0){
+                strcpy(rootBook->info->whoBorrowed, email);
+                strcpy(rootBook->info->status, "Emprestado");
+                rootBook->info->numOfLoans++;
+                rootUser->info->numOfBooks++;
+                printf("Empréstimo realizado.\n");
+            } else{
+                printf("Livro já emprestado\n");
+            }
         }
     }
     return rootBook;
@@ -358,7 +435,8 @@ int main(){
         printf("4. Exclusão\n");
         printf("5. Empréstimo\n");
         printf("6. Devolução\n");
-        printf("7. Estatísticas\n");
+        printf("7. Mostrar todos\n");
+        printf("8. Estatísticas\n");
         printf("0. Sair\n");
         printf("------------------------------\n");
         printf("Escolha uma opção: ");
@@ -491,7 +569,34 @@ int main(){
             }
         }
 
-        //FALTA OPTION 3 ATUALIZAÇÃO!!!
+        if (option == 3){
+            int optupd;
+
+            printf("\n1. Livros\n");
+            printf("2. Usuários\n");
+            printf("0. Voltar\n");
+            printf("Escolha uma opção: ");
+            scanf("%d", &optupd);
+            while (getchar() != '\n');
+
+            if (optupd < 0 || optupd > 2){
+                    printf("\nOpção inválida!\n");
+            }
+            if (optupd == 1){
+                int id;
+                printf("ID: ");
+                scanf("%d", &id);
+                while (getchar() != '\n');
+                rootBook = updateBook(rootBook, id);
+            }
+            if (optupd == 2){
+                char email[MAX_EMAIL];
+                printf("Email: ");
+                fgets(email, MAX_NAME, stdin);
+                email[strcspn(email, "\n")] = '\0';
+                rootUser = updateUser(rootUser, email);
+            }
+        }
 
         if (option == 4){
             int optdel;
