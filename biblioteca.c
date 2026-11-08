@@ -321,9 +321,9 @@ NodeBook *updateBook(NodeBook *rootBook, int id){
     }
 
     if (rootBook->info->id > id){
-        rootBook->left = findBookById(rootBook->left, id);
+        rootBook->left = updateBook(rootBook->left, id);
     } else if (rootBook->info->id < id){
-        rootBook->right = findBookById(rootBook->right, id);
+        rootBook->right = updateBook(rootBook->right, id);
     } else {
         printf("\n\t%s (%d) | ID: %d\n\tAutor: %s | Status: %s | Emprestado para: %s\n", rootBook->info->title, rootBook->info->year, rootBook->info->id, rootBook->info->writer, rootBook->info->status, rootBook->info->whoBorrowed);
         char newTitle[MAX_TITLE], newWriter[MAX_NAME];
@@ -363,9 +363,9 @@ NodeUser *updateUser(NodeUser *rootUser, char email[]){
     }
 
     if (strcmp(rootUser->info->email, email) > 0){
-        rootUser->left = findUserByEmail(rootUser->left, email);
+        rootUser->left = updateUser(rootUser->left, email);
     } else if (strcmp(rootUser->info->email, email) < 0){
-        rootUser->right = findUserByEmail(rootUser->right, email);
+        rootUser->right = updateUser(rootUser->right, email);
     } else{
         printf("\n\tUsuário: %s\n\tEmail: %s\n\tNúmero de livros em posse: %d\n", rootUser->info->name, rootUser->info->email, rootUser->info->numOfBooks);
         char newName[MAX_NAME];
@@ -421,6 +421,53 @@ NodeBook *bookLoan(NodeBook *rootBook, NodeUser *rootUser, int id, char email[])
     return rootBook;
 }
 
+NodeBook *returnBook(NodeBook *rootBook, NodeUser *rootUser, int id){
+    if (rootBook == NULL){
+        printf("\nLivro não encontrado.\n");
+        return NULL;
+    }
+
+    if (rootBook->info->id > id){
+        rootBook->left = returnBook(rootBook->left, rootUser, id);
+    } else if (rootBook->info->id < id){
+        rootBook->right = returnBook(rootBook->right, rootUser, id);
+    } else{
+            if (strcmp(rootBook->info->status, "Emprestado") == 0){
+                strcpy(rootBook->info->whoBorrowed, "Ninguém");
+                strcpy(rootBook->info->status, "Disponível");
+                rootUser->info->numOfBooks--;
+                printf("Devolução realizada.\n");
+            } else{
+                printf("Livro já está disponível!\n");
+            }
+        }
+    return rootBook;
+}
+
+void freeBooks(NodeBook *rootBook){
+    if (rootBook == NULL){
+        return;
+    }
+
+    freeBooks(rootBook->left);
+    freeBooks(rootBook->right);
+
+    free(rootBook->info);
+    free(rootBook);
+}
+
+void freeUsers(NodeUser *rootUser){
+    if (rootUser == NULL){
+        return;
+    }
+
+    freeUsers(rootUser->left);
+    freeUsers(rootUser->right);
+
+    free(rootUser->info);
+    free(rootUser);
+}
+
 
 int main(){
     int option= -1;
@@ -445,10 +492,6 @@ int main(){
 
         if (option < 0 || option > 7){
             printf("Opção inválida!\n");
-        }
-
-        if (option == 0){
-            break;
         }
 
         if (option == 1){
@@ -641,10 +684,18 @@ int main(){
             while (getchar() != '\n');
             bookLoan(rootBook, rootUser, id, email);
         }
+
+        if (option == 6){
+            int id;
+            printf("ID: ");
+            scanf("%d", &id);
+            while (getchar() != '\n');
+            returnBook(rootBook, rootUser, id);
+        }
     }
-    showBooksInOrder(rootBook);
-    showUserInOrder(rootUser);
     
+    freeBooks(rootBook);
+    freeUsers(rootUser);
 
     return 0;
 }
