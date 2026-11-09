@@ -129,7 +129,7 @@ NodeUser *insertUser(NodeUser *rootUser, NodeUser *newUser){
     return rootUser;
 }
 
-NodeBook *deleteBook(NodeBook *rootBook, int id){
+NodeBook *deleteBook(NodeBook *rootBook,int id){
     if (rootBook == NULL){
         printf("Livro não encontrado.\n");
         return rootBook;
@@ -140,6 +140,10 @@ NodeBook *deleteBook(NodeBook *rootBook, int id){
     } else if (rootBook->info->id < id){
         rootBook->right = deleteBook(rootBook->right, id);
     } else {
+        if (strcmp(rootBook->info->status, "Emprestado") == 0){
+            printf("\nO livro deve ser devolvido antes de ser deletado!\n");
+            return rootBook;
+        }
         //Caso com 0 ou 1 filho
         if (rootBook->left == NULL){
             NodeBook *aux = rootBook->right;
