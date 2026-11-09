@@ -211,7 +211,6 @@ NodeUser *deleteUser(NodeUser *rootUser, char email[]){
 
 NodeBook *showBooksInOrder(NodeBook *rootBook){
     if (rootBook == NULL){
-        printf("Nenhum livro cadastrado.\n");
         return rootBook;
     }
 
@@ -224,7 +223,6 @@ NodeBook *showBooksInOrder(NodeBook *rootBook){
 
 NodeUser *showUserInOrder(NodeUser *rootUser){
     if (rootUser == NULL){
-        printf("Nenhum usuário cadastrado.\n");
         return rootUser;
     }
 
@@ -732,10 +730,18 @@ int main(){
                 printf("\nOpção inválida!\n");
             }
             if (optshow == 1){
-                showBooksInOrder(rootBook);
+                NodeBook *verify;
+                verify = showBooksInOrder(rootBook);
+                if (verify == NULL){
+                    printf("\nNenhum livro cadastrado.\n");
+                }
             }
             if (optshow == 2){
-                showUserInOrder(rootUser);
+                NodeUser *verify;
+                verify = showUserInOrder(rootUser);
+                if (verify == NULL){
+                    printf("\nNenhum usuário cadastrado.\n");
+                }
             }
         }
 
