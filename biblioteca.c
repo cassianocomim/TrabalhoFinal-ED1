@@ -141,7 +141,8 @@ NodeBook *deleteBook(NodeBook *rootBook,int id){
         rootBook->right = deleteBook(rootBook->right, id);
     } else {
         if (strcmp(rootBook->info->status, "Emprestado") == 0){
-            printf("\nO livro deve ser devolvido antes de ser deletado!\n");
+            printf("\nOperação não concluída!\n");
+            printf("O livro deve ser devolvido antes de ser deletado!\n");
             return rootBook;
         }
         //Caso com 0 ou 1 filho
@@ -184,6 +185,11 @@ NodeUser *deleteUser(NodeUser *rootUser, char email[]){
     } else if (strcmp(rootUser->info->email, email) < 0){
         rootUser->right = deleteUser(rootUser->right, email);
     } else {
+        if (rootUser->info->numOfBooks > 0){
+            printf("\nOperação não concluída!\n");
+            printf("O usuário só pode ser deletado se estiver com 0 livros em posse!\n");
+            return rootUser;
+        }
         //Caso com 0 ou 1 filho
         if (rootUser->left == NULL){
             NodeUser *aux = rootUser->right;
